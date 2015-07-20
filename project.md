@@ -42,26 +42,42 @@ I chose to fit a random forests model because it is precise and works better wit
 
 ```r
 model <- train(classe~.,data=train,method="rf")
-```
-
-```
-## Error in e$fun(obj, substitute(ex), parent.frame(), e$data): worker initialization failed: list(Accuracy = 0.998923408182098, Kappa = 0.998639019409807, .cell1 = 1844, .cell2 = 0, .cell3 = 0, .cell4 = 0, .cell5 = 0, .cell6 = 3, .cell7 = 1215, .cell8 = 2, .cell9 = 0, .cell10 = 0, .cell11 = 0, .cell12 = 1, .cell13 = 1128, .cell14 = 0, .cell15 = 0, .cell16 = 0, .cell17 = 0, .cell18 = 0, .cell19 = 1115, .cell20 = 0, .cell21 = 0, .cell22 = 0, .cell23 = 0, .cell24 = 1, .cell25 = 1193, mtry = 79, Resample = "Resample03")NULL
-```
-
-```r
 validate <- predict(model,newdata=valid)
-```
-
-```
-## Error in predict(model, newdata = valid): object 'model' not found
-```
-
-```r
 confusionMatrix(validate,valid$classe)
 ```
 
 ```
-## Error in confusionMatrix(validate, valid$classe): object 'validate' not found
+## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction   A   B   C   D   E
+##          A 558   1   0   0   0
+##          B   0 378   0   0   0
+##          C   0   0 342   0   0
+##          D   0   0   0 321   0
+##          E   0   0   0   0 360
+## 
+## Overall Statistics
+##                                      
+##                Accuracy : 0.9995     
+##                  95% CI : (0.9972, 1)
+##     No Information Rate : 0.2847     
+##     P-Value [Acc > NIR] : < 2.2e-16  
+##                                      
+##                   Kappa : 0.9994     
+##  Mcnemar's Test P-Value : NA         
+## 
+## Statistics by Class:
+## 
+##                      Class: A Class: B Class: C Class: D Class: E
+## Sensitivity            1.0000   0.9974   1.0000   1.0000   1.0000
+## Specificity            0.9993   1.0000   1.0000   1.0000   1.0000
+## Pos Pred Value         0.9982   1.0000   1.0000   1.0000   1.0000
+## Neg Pred Value         1.0000   0.9994   1.0000   1.0000   1.0000
+## Prevalence             0.2847   0.1934   0.1745   0.1638   0.1837
+## Detection Rate         0.2847   0.1929   0.1745   0.1638   0.1837
+## Detection Prevalence   0.2852   0.1929   0.1745   0.1638   0.1837
+## Balanced Accuracy      0.9996   0.9987   1.0000   1.0000   1.0000
 ```
 
 It appears that the prediction is accurate. Then I did cross valdiation with rfcv:
@@ -75,9 +91,9 @@ crossval[2]
 ```
 ## $error.cv
 ##           57           28           14            7            4 
-## 0.0009683009 0.0008663745 0.0006625217 0.0004077056 0.0024462338 
+## 0.0006625217 0.0005096320 0.0003057792 0.0001528896 0.0024462338 
 ##            1 
-## 0.4120375089
+## 0.4124961778
 ```
 
 So the expected error rate is around the errors shown above.
@@ -86,18 +102,12 @@ Predicting test cases:
 
 ```r
 answers <- predict(model,newdata=testingnew)
-```
-
-```
-## Error in predict(model, newdata = testingnew): object 'model' not found
-```
-
-```r
 answers
 ```
 
 ```
-## Error in eval(expr, envir, enclos): object 'answers' not found
+##  [1] B A B A A E D B A A B C B A E E A B B B
+## Levels: A B C D E
 ```
 
 ```r
@@ -110,8 +120,4 @@ pml_write_files=function(x){
      }
 }
 pml_write_files(answers)
-```
-
-```
-## Error in pml_write_files(answers): object 'answers' not found
 ```
