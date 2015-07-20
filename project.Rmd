@@ -1,0 +1,67 @@
+---
+title: "Prediction of Activity Type"
+output: html_document
+---
+
+This report uses data collected by devices detecting human movements. I described how I built my model, how I did cross validation and estimated error, and how I made the choices on these steps. Then I predicted activity types with the testing dataset.
+
+First read data:
+
+```{r,cache=TRUE}
+training <- read.csv("pml-training.csv")
+testing <- read.csv("pml-testing.csv")
+library(caret)
+```
+
+Then I processed data. I found there are NA values in the testing set so I excluded those columns from both training and testing data, using near zero variation. In addition, the first column "X" in both datasets are unique ids for each observation. I excluded it from bot datasets as well because it would heavily biase the prediction results.
+
+```{r,cache=TRUE}
+#calculating near zero variation (NAs in the testing set):
+nzv <- nearZeroVar(testing,saveMetrics=TRUE)
+#keeping non NAs in both datasets:
+testingnew <- testing[,which(nzv$zeroVar=="FALSE")]
+trainingnew <- training[,which(nzv$zeroVar=="FALSE")]
+#removing the first column "X" from both datasets:
+testingnew <- testingnew[,-1]
+trainingnew<-trainingnew[,-1]
+```
+
+I sliced training data into training and validation sets:
+
+```{r,cache=TRUE}
+intrain <- createDataPartition(y=trainingnew$classe,p=0.9,list=FALSE)
+train<-trainingnew[intrain,]
+valid<-trainingnew[-intrain,]
+```
+
+I chose to fit a random forests model because it is precise and works better with non-linear models. Then I did prediction with the validation data.
+
+```{r,cache=TRUE}
+model <- train(classe~.,data=train,method="rf")
+validate <- predict(model,newdata=valid)
+confusionMatrix(validate,valid$classe)
+```
+
+It appears that the prediction is accurate. Then I did cross valdiation with rfcv:
+
+```{r,cache=TRUE}
+crossval <- rfcv(trainingnew[,-58],trainingnew[,58],cv.fold=5)
+crossval[2]
+```
+
+So the expected error rate is around the errors shown above.
+Predicting test cases:
+
+```{r,cache=TRUE}
+answers <- predict(model,newdata=testingnew)
+answers
+#Writing answers into text files:
+pml_write_files=function(x){
+      n=length(x)
+      for (i in 1:n){
+            filename=paste0("problem_id_",i,".txt")
+            write.table(x[i],file=filename,quote=FALSE,row.names=FALSE,col.names=FALSE)
+     }
+}
+pml_write_files(answers)
+```
